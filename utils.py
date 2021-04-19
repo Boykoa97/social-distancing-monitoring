@@ -21,6 +21,7 @@ ROIs = {
     'mall': (-2., 8., -7., 7.),
     'grand_central': (-7., 25., 0., 34.),
     'oxford_town':  (0., 14., 5., 28.),
+    'oxford_town_group':  (0., 14., 5., 28.),
 }
 
 
@@ -38,10 +39,11 @@ def decode_data(data, roi):
     density = []
     ts_inference = []
     pts_roi_all_frame = []
+    reg_out_all_frame = []
     inds_frame = []
     nums_ped = []
 
-    for i_frame, t_inference, pts in data:
+    for i_frame, t_inference, pts, reg_out in data:
         count_in = 0
         count_out = 0
         pts_roi = []
@@ -52,6 +54,7 @@ def decode_data(data, roi):
             else:
                 count_out += 1
         pts_roi_all_frame.append(np.array(pts_roi))
+        reg_out_all_frame.append(reg_out)
         density.append(count_in / area)
         ts_inference.append(t_inference)
         inds_frame.append(i_frame)
@@ -59,29 +62,30 @@ def decode_data(data, roi):
 
         # print('frame %d - num. of ped inside roi: %d, outside: %d' % (i_frame, count_in, count_out))
 
-    return np.array(inds_frame), np.array(ts_inference), pts_roi_all_frame, np.array(density), nums_ped
+    return np.array(inds_frame), np.array(ts_inference), pts_roi_all_frame, np.array(density), nums_ped, reg_out_all_frame
 
 
-def count_violation_pairs(pts_all_frames, dist=2.0):
+def count_violation_pairs(pts_all_frames, reg_out_all_frame, dist=2.0):
     counts = []
-    for pts in pts_all_frames:
-        pairs = find_violation(pts, dist)
+    for i in range(len(pts_all_frames)):
+        pairs = find_violation(pts_all_frames[i], reg_out_all_frame[i], dist)
         counts.append(len(pairs))
     return np.array(counts)
 
 
-def find_violation(pts, dist=2.0):
+def find_violation(pts, group_check, dist=2.0):
     """
 
     :param pts: positions of all pedestrians in a single frame
     :param dist: social distance
+    :param group_check: the regression output checking the difference in between people in a track
     :return: a list of index pairs indicating two pedestrians who are violating social distancing
     """
     n = len(pts)  # number of pedestrians
     pairs = []
     for i in np.arange(0, n, 1):
         for j in np.arange(i+1, n, 1):
-            if np.linalg.norm(pts[i] - pts[j]) < dist:
+            if (np.linalg.norm(pts[i] - pts[j]) < dist) and group_check[i,j] != True:
                 pairs.append((i, j))
     return pairs
 

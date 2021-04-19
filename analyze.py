@@ -9,6 +9,7 @@ from utils import ROIs, count_violation_pairs, decode_data, cal_min_dists_all_fr
 
 
 dict_dataset_names = {
+    'oxford_town_group': 'Oxford Town Center Dataset',
     'oxford_town': 'Oxford Town Center Dataset',
     'mall': 'Mall Dataset',
     'grand_central': 'Train Station Dataset'
@@ -32,11 +33,12 @@ def analyze_statistics(dataset):
     roi = ROIs[dataset]
     x_min, x_max, y_min, y_max = roi
     area = (x_max - x_min) * (y_max - y_min)
-    indexs_frame, ts_inference, pts_roi_all_frame, density, nums_ped = decode_data(data=data, roi=roi)
+    indexs_frame, ts_inference, pts_roi_all_frame, density, nums_ped, reg_out_all_frame = decode_data(data=data, roi=roi)
     print('Mean inference time = %.6f' % np.mean(ts_inference))
 
     all_min_dists, min_min_dists, avg_min_dists = cal_min_dists_all_frame(pts_roi_all_frame)
-    violations = count_violation_pairs(pts_all_frames=pts_roi_all_frame)
+    #violations = count_violation_pairs(pts_all_frames=pts_roi_all_frame)
+    violations = count_violation_pairs(pts_all_frames=pts_roi_all_frame, reg_out_all_frame=reg_out_all_frame)
 
     none_indexes = np.where(avg_min_dists == None)[0]
     indexs_frame = np.delete(indexs_frame, none_indexes, 0)
@@ -82,6 +84,8 @@ def analyze_statistics(dataset):
     t_max = 300
 
     if dataset == 'oxford_town':
+        ts = indexs_frame / 10
+    if dataset == 'oxford_town_group':
         ts = indexs_frame / 10
     elif dataset == 'mall':
         ts = indexs_frame / 1
@@ -216,7 +220,8 @@ def analyze_statistics(dataset):
 
 
 def main():
-    for dataset in ['oxford_town', 'mall', 'grand_central']:
+    for dataset in ['oxford_town_group']:
+    #for dataset in ['oxford_town', 'mall', 'grand_central']:
     # for dataset in ['oxford_town', 'mall']:
 
         analyze_statistics(dataset=dataset)
