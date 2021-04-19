@@ -85,3 +85,24 @@ Execute `analyze.py` to obtain the analysis result. It will be saved in the same
 For further info please contact:
 - Dongfang Yang: yang.3455@osu.edu
 - Ekim Yurtsever: yurtsever.2@osu.edu
+
+
+## My Contribuitions 
+
+These are the contributions added by Anthony Boyko with the University of British Columbia 
+
+adjusted the work proposed above Dongfang Yang and Ekim Yurtsever to add siamfc tracker which can be found https://github.com/huanglianghua/siamfc-pytorch 
+
+These changes adjust siamfc to run on windows and using python 3.8 with pytorch 1.6
+
+with 
+```shell
+conda install pytorch==1.6.0 torchvision==0.7.0 cudatoolkit=10.2 -c pytorch
+```
+The addition of tracker is used to determine groups and cancel out false positives. In which a regression is run on the change in difference between two people in a frame over time. 
+
+Due to the runtime being quite slow. Subsection of the oxford dataset are only used whereas originally 3 datasets are used.
+
+Also cutoffs where added to the visiualizations to due to a memory error. 
+
+
